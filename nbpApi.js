@@ -1,3 +1,4 @@
+const debug = require("debug")("nbpcalculator:api");
 const axios = require("axios");
 const { DateTime } = require("luxon");
 const NodeCache = require("node-cache");
@@ -40,10 +41,10 @@ exports.getRates = async (year, month) => {
   const cacheKey = `${year}/${month}`;
   const cacheTTL = year === now.year && month === now.month ? 3600 : 0;
 
-  console.log(`ttl: ${cacheTTL} | key: ${cacheKey}`);
+  debug(`ttl: ${cacheTTL} | key: ${cacheKey}`);
 
   if (apiCache.has(cacheKey)) {
-    console.log("getting response from cache");
+    debug("getting response from cache");
     return apiCache.get(cacheKey);
   } else {
     let response;
@@ -53,7 +54,7 @@ exports.getRates = async (year, month) => {
         `/exchangerates/tables/A/${range.start}/${range.end}/`
       );
     } catch (error) {
-      console.log(error.message);
+      debug(error.message);
       return undefined;
     }
 

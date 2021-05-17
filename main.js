@@ -1,3 +1,4 @@
+const debug = require("debug")("nbpcalculator:main");
 const WebSocket = require("ws");
 const { validate } = require("jsonschema");
 const _ = require("lodash");
@@ -51,7 +52,6 @@ function handleMessage(ws, message) {
 }
 
 wss.on("connection", (ws, req) => {
-  console.log(`${req.socket.remoteAddress}: connected`);
-
+  debug(`${req.socket.remoteAddress}: connected`);
   ws.on("message", (message) => handleMessage(ws, message));
 });

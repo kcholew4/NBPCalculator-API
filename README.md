@@ -7,6 +7,7 @@ A websocket API for NBPCalculator
 ```bash
 yarn install
 ```
+
 ```bash
-node main.js
+yarn dev
 ```
