@@ -8,7 +8,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 
 const methodsList = {
   GET_RANGE: methods.getRange,
-  GET_AVAILABLE_DAYS: methods.getAvailableDays,
+  GET_DISABLED_DAYS: methods.getDisabledDays,
   GET_RATES: methods.getRates,
 };
 
@@ -29,8 +29,11 @@ function handleMessage(ws, message) {
         type: "string",
       },
       payload: {},
+      id: {
+        type: "number",
+      },
     },
-    required: ["method"],
+    required: ["method", "id"],
   };
 
   const { valid } = validate(parsedMessage, messageSchema, { required: true });
@@ -48,7 +51,12 @@ function handleMessage(ws, message) {
   }
 
   const method = methodsList[requestedMethod];
-  method(ws, parsedMessage.payload);
+
+  method({
+    ws,
+    payload: parsedMessage.payload,
+    id: parsedMessage.id,
+  });
 }
 
 wss.on("connection", (ws, req) => {

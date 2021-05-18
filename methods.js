@@ -1,5 +1,6 @@
 const { DateTime } = require("luxon");
 const { validate } = require("jsonschema");
+const _ = require("lodash");
 const nbpApi = require("./nbpApi");
 
 async function fetchTables(payload) {
@@ -31,7 +32,7 @@ async function fetchTables(payload) {
   return response;
 }
 
-exports.getRange = async (ws) => {
+exports.getRange = async ({ ws, id }) => {
   const { year, month } = DateTime.now();
 
   let apiResponse;
@@ -48,13 +49,16 @@ exports.getRange = async (ws) => {
 
   ws.send(
     JSON.stringify({
-      start,
-      end,
+      id,
+      response: {
+        start,
+        end,
+      },
     })
   );
 };
 
-exports.getAvailableDays = async (ws, payload) => {
+exports.getDisabledDays = async ({ ws, payload, id }) => {
   let apiResponse;
 
   try {
@@ -64,17 +68,29 @@ exports.getAvailableDays = async (ws, payload) => {
     return;
   }
 
-  let days = [];
+  //Payload is already verified
+  const start = DateTime.local(payload.year, payload.month);
+  let allDays = [];
 
-  for (const table of apiResponse) {
-    const { day } = DateTime.fromISO(table.effectiveDate);
-    days.push(day);
+  for (let i = 0; i < start.daysInMonth; i++) {
+    allDays.push(start.plus({ days: i }).toISODate());
   }
 
-  ws.send(JSON.stringify(days));
+  let availableDays = [];
+
+  for (const table of apiResponse) {
+    availableDays.push(table.effectiveDate);
+  }
+
+  ws.send(
+    JSON.stringify({
+      id,
+      response: _.without(allDays, ...availableDays),
+    })
+  );
 };
 
-exports.getRates = async (ws, payload) => {
+exports.getRates = async ({ ws, payload, id }) => {
   let apiResponse;
 
   try {
@@ -103,5 +119,10 @@ exports.getRates = async (ws, payload) => {
     });
   }
 
-  ws.send(JSON.stringify(res));
+  ws.send(
+    JSON.stringify({
+      id,
+      response: res,
+    })
+  );
 };
