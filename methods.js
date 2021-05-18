@@ -43,16 +43,13 @@ exports.getRange = async ({ ws, id }) => {
     ws.send(`error: ${error.message}`);
   }
 
-  const start = "2002-01-02";
   //I trust that the tables order is always correct.
-  const end = apiResponse[apiResponse.length - 1].effectiveDate;
-
   ws.send(
     JSON.stringify({
       id,
       response: {
-        start,
-        end,
+        min: "2002-01-02",
+        max: apiResponse[apiResponse.length - 1].effectiveDate,
       },
     })
   );
