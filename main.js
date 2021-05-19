@@ -4,7 +4,11 @@ const { validate } = require("jsonschema");
 const _ = require("lodash");
 const methods = require("./methods");
 
-const wss = new WebSocket.Server({ port: 8080 });
+const port = process.env.PORT || 3000;
+
+console.log(`port: ${port}`);
+
+const wss = new WebSocket.Server({ port });
 
 const methodsList = {
   GET_RANGE: methods.getRange,
