@@ -97,7 +97,7 @@ exports.getRates = async ({ ws, payload, id }) => {
     return;
   }
 
-  let res = [];
+  let tables = [];
 
   for (const table of apiResponse) {
     let rates = [];
@@ -109,7 +109,7 @@ exports.getRates = async ({ ws, payload, id }) => {
       });
     }
 
-    res.push({
+    tables.push({
       table: table.no,
       date: table.effectiveDate,
       rates,
@@ -119,7 +119,10 @@ exports.getRates = async ({ ws, payload, id }) => {
   ws.send(
     JSON.stringify({
       id,
-      response: res,
+      response: {
+        key: `${payload.year}/${payload.month}`,
+        tables,
+      },
     })
   );
 };

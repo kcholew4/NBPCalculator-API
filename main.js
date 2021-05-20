@@ -17,6 +17,11 @@ const methodsList = {
 };
 
 function handleMessage(ws, message) {
+  if (message === "ping") {
+    ws.send("pong");
+    return;
+  }
+
   let parsedMessage;
 
   try {
