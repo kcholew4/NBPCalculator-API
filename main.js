@@ -69,6 +69,13 @@ function handleMessage(ws, message) {
 }
 
 wss.on("connection", (ws, req) => {
-  debug(`${req.socket.remoteAddress}: connected`);
+  let ip;
+  if (!req.headers["x-forwarded-for"]) {
+    ip = req.socket.remoteAddress;
+  } else {
+    ip = req.headers["x-forwarded-for"].split(/\s*,\s*/)[0];
+  }
+
+  debug(`${ip}: connected`);
   ws.on("message", (message) => handleMessage(ws, message));
 });
