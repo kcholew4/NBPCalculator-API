@@ -55,7 +55,7 @@ exports.getRates = async (year, month) => {
       );
     } catch (error) {
       debug(error.message);
-      return undefined;
+      throw new Error(error.message);
     }
 
     apiCache.set(cacheKey, response.data, cacheTTL);

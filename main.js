@@ -2,7 +2,7 @@ const debug = require("debug")("nbpcalculator:main");
 const WebSocket = require("ws");
 const { validate } = require("jsonschema");
 const _ = require("lodash");
-const methods = require("./methods");
+const methods = require("./methods/index");
 
 const port = process.env.PORT || 3000;
 
@@ -13,7 +13,7 @@ const wss = new WebSocket.Server({ port });
 const methodsList = {
   GET_RANGE: methods.getRange,
   GET_DISABLED_DAYS: methods.getDisabledDays,
-  GET_RATES: methods.getRates,
+  GET_TABLE: methods.getTable,
 };
 
 function handleMessage(ws, message) {
@@ -27,7 +27,11 @@ function handleMessage(ws, message) {
   try {
     parsedMessage = JSON.parse(message);
   } catch (error) {
-    ws.send("it's not valid json");
+    ws.send(
+      JSON.stringify({
+        error: "cannot parse message",
+      })
+    );
     return;
   }
 
@@ -48,14 +52,22 @@ function handleMessage(ws, message) {
   const { valid } = validate(parsedMessage, messageSchema, { required: true });
 
   if (!valid) {
-    ws.send("invalid format");
+    ws.send(
+      JSON.stringify({
+        error: "invalid message format",
+      })
+    );
     return;
   }
 
   const requestedMethod = _.toUpper(parsedMessage.method);
 
   if (!_.has(methodsList, requestedMethod)) {
-    ws.send(`"${requestedMethod}" method does not exist`);
+    ws.send(
+      JSON.stringify({
+        error: `"${requestedMethod}" method does not exist`,
+      })
+    );
     return;
   }
 
