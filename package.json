@@ -1,7 +1,7 @@
 {
   "name": "nbpcalculator-api",
   "version": "1.0.0",
-  "main": "main.js",
+  "exports": "./main.js",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
@@ -19,5 +19,6 @@
   "scripts": {
     "dev": "cross-env DEBUG=nbpcalculator:* nodemon main",
     "start": "node main"
-  }
+  },
+  "type": "module"
 }

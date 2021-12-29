@@ -1,8 +1,10 @@
-const debug = require("debug")("nbpcalculator:main");
-const WebSocket = require("ws");
-const { validate } = require("jsonschema");
-const _ = require("lodash");
-const methods = require("./methods/index");
+import Debug from "debug";
+import WebSocket from "ws";
+import { validate } from "jsonschema";
+import _ from "lodash";
+import * as methods from "./methods/index.js";
+
+const debug = Debug("nbpcalculator:main");
 
 const port = process.env.PORT || 3000;
 

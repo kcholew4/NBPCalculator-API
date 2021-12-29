@@ -1,12 +1,12 @@
-const getRange = require("./getRange");
-const getDisabledDays = require("./getDisabledDays");
-const getTable = require("./getTable");
+import _getRange from "./getRange.js";
+import _getDisabledDays from "./getDisabledDays.js";
+import _getTable from "./getTable.js";
 
-exports.getRange = async ({ ws, id }) => {
+export const getRange = async ({ ws, id }) => {
   let range;
 
   try {
-    range = await getRange();
+    range = await _getRange();
   } catch (error) {
     ws.send(
       JSON.stringify({
@@ -25,11 +25,11 @@ exports.getRange = async ({ ws, id }) => {
   );
 };
 
-exports.getDisabledDays = async ({ ws, payload, id }) => {
+export const getDisabledDays = async ({ ws, payload, id }) => {
   let disabledDays;
 
   try {
-    disabledDays = await getDisabledDays(payload);
+    disabledDays = await _getDisabledDays(payload);
   } catch (error) {
     ws.send(
       JSON.stringify({
@@ -48,11 +48,11 @@ exports.getDisabledDays = async ({ ws, payload, id }) => {
   );
 };
 
-exports.getTable = async ({ ws, payload, id }) => {
+export const getTable = async ({ ws, payload, id }) => {
   let rates;
 
   try {
-    rates = await getTable(payload);
+    rates = await _getTable(payload);
   } catch (error) {
     ws.send(
       JSON.stringify({

@@ -1,8 +1,8 @@
-const { DateTime } = require("luxon");
-const { validate } = require("jsonschema");
-const _ = require("lodash");
-const nbpApi = require("../nbpApi");
-const getRange = require("./getRange");
+import { DateTime } from "luxon";
+import { validate } from "jsonschema";
+import _ from "lodash";
+import * as nbpApi from "../nbpApi.js";
+import getRange from "./getRange.js";
 
 async function getTable(payload) {
   const payloadSchema = { type: "string" };
@@ -56,4 +56,4 @@ async function getTable(payload) {
   };
 }
 
-module.exports = getTable;
+export default getTable;

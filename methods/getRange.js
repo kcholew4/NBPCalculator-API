@@ -1,5 +1,5 @@
-const { DateTime } = require("luxon");
-const nbpApi = require("../nbpApi");
+import { DateTime } from "luxon";
+import * as nbpApi from "../nbpApi.js";
 
 async function getRange() {
   const { year, month } = DateTime.now();
@@ -19,4 +19,4 @@ async function getRange() {
   };
 }
 
-module.exports = getRange;
+export default getRange;

@@ -1,7 +1,9 @@
-const debug = require("debug")("nbpcalculator:api");
-const axios = require("axios");
-const { DateTime } = require("luxon");
-const NodeCache = require("node-cache");
+import Debug from "debug";
+import axios from "axios";
+import { DateTime } from "luxon";
+import NodeCache from "node-cache";
+
+const debug = Debug("nbpcalculator:api");
 
 const apiCache = new NodeCache();
 
@@ -33,7 +35,7 @@ function getValidRange(year, month) {
   };
 }
 
-exports.getRates = async (year, month) => {
+export const getRates = async (year, month) => {
   const now = DateTime.now();
 
   const range = getValidRange(year, month);

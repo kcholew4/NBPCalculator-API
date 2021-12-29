@@ -1,7 +1,7 @@
-const { DateTime } = require("luxon");
-const { validate } = require("jsonschema");
-const _ = require("lodash");
-const nbpApi = require("../nbpApi");
+import { DateTime } from "luxon";
+import { validate } from "jsonschema";
+import _ from "lodash";
+import * as nbpApi from "../nbpApi.js";
 
 function returnDisabledDays({ year, month }, tables) {
   const start = DateTime.local(year, month);
@@ -48,4 +48,4 @@ async function getDisabledDays(payload) {
   return returnDisabledDays(payload, apiResponse);
 }
 
-module.exports = getDisabledDays;
+export default getDisabledDays;
