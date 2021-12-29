@@ -1,95 +1,35 @@
 import Debug from "debug";
-import WebSocket from "ws";
-import { validate } from "jsonschema";
-import _ from "lodash";
-import * as methods from "./methods/index.js";
+import http from "http";
+import { Server } from "socket.io";
+
+import registerTableHandlers from "./tableHandler.js";
 
 const debug = Debug("nbpcalculator:main");
 
+const server = http.createServer();
+const io = new Server(server);
+
 const port = process.env.PORT || 3000;
+server.listen(port, () => console.log(`Listening on port ${port}`));
 
-console.log(`port: ${port}`);
+io.on("connection", (socket) => {
+  debug(`ip: ${socket.handshake.address} connected`);
 
-const wss = new WebSocket.Server({ port });
+  socket.use(([event, ...args], next) => {
+    if (typeof args.at(-1) !== "function") {
+      return next(new Error("not an acknowledgement"));
+    }
 
-const methodsList = {
-  GET_RANGE: methods.getRange,
-  GET_DISABLED_DAYS: methods.getDisabledDays,
-  GET_TABLE: methods.getTable,
-};
-
-function handleMessage(ws, message) {
-  if (message === "ping") {
-    ws.send("pong");
-    return;
-  }
-
-  let parsedMessage;
-
-  try {
-    parsedMessage = JSON.parse(message);
-  } catch (error) {
-    ws.send(
-      JSON.stringify({
-        error: "cannot parse message",
-      })
-    );
-    return;
-  }
-
-  const messageSchema = {
-    type: "object",
-    properties: {
-      method: {
-        type: "string",
-      },
-      payload: {},
-      id: {
-        type: "number",
-      },
-    },
-    required: ["method", "id"],
-  };
-
-  const { valid } = validate(parsedMessage, messageSchema, { required: true });
-
-  if (!valid) {
-    ws.send(
-      JSON.stringify({
-        error: "invalid message format",
-      })
-    );
-    return;
-  }
-
-  const requestedMethod = _.toUpper(parsedMessage.method);
-
-  if (!_.has(methodsList, requestedMethod)) {
-    ws.send(
-      JSON.stringify({
-        error: `"${requestedMethod}" method does not exist`,
-      })
-    );
-    return;
-  }
-
-  const method = methodsList[requestedMethod];
-
-  method({
-    ws,
-    payload: parsedMessage.payload,
-    id: parsedMessage.id,
+    next();
   });
-}
 
-wss.on("connection", (ws, req) => {
-  let ip;
-  if (!req.headers["x-forwarded-for"]) {
-    ip = req.socket.remoteAddress;
-  } else {
-    ip = req.headers["x-forwarded-for"].split(/\s*,\s*/)[0];
-  }
+  socket.on("error", (error) => {
+    if (error) {
+      debug(error.message);
+    }
 
-  debug(`${ip}: connected`);
-  ws.on("message", (message) => handleMessage(ws, message));
+    socket.disconnect();
+  });
+
+  registerTableHandlers(io, socket);
 });
