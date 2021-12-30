@@ -38,41 +38,43 @@ function getValidRange(year, month) {
 
 export const getRates = async (year, month) => {
   const now = DateTime.now();
-  const inCurrentMonth =
-    DateTime.local(year, month) >= DateTime.local(now.year, now.month);
+  const inCurrentMonth = DateTime.local(year, month) >= DateTime.local(now.year, now.month);
 
   const key = `${year}/${month}`;
 
-  if (inCurrentMonth) {
-    //For tables in current month use cache
-    if (apiCache.has(key)) {
-      debug("response from cache");
-      return apiCache.get(key);
-    }
-  } else {
-    const query = await TableContainer.findOne({ key });
+  if (apiCache.has(key)) {
+    debug("response from cache");
+    return apiCache.get(key);
+  }
+
+  //Don't store in database tables from current month
+  if (!inCurrentMonth) {
+    const query = await TableContainer.findOne({ key }, { "tables._id": 0 });
 
     if (query) {
-      return query.tables;
+      debug("response from database");
+      apiCache.set(key, query.tables.toObject(), 60 * 60 * 24);
+      return query.tables.toObject();
     }
   }
 
   const range = getValidRange(year, month);
 
   try {
-    const response = await instance.get(
-      `/exchangerates/tables/A/${range.start}/${range.end}/`
-    );
+    debug("fetching response from api");
+    const response = await instance.get(`/exchangerates/tables/A/${range.start}/${range.end}/`);
 
-    if (inCurrentMonth) {
-      apiCache.set(key, response.data);
-    } else {
+    if (!inCurrentMonth) {
       const tableContainer = new TableContainer({
         key,
         tables: response.data,
       });
 
       await tableContainer.save();
+      apiCache.set(key, response.data, 60 * 60 * 24);
+    } else {
+      //Lower ttl for tables in current month
+      apiCache.set(key, response.data, 1800);
     }
 
     return response.data;
