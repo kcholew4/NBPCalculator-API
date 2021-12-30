@@ -2,6 +2,7 @@ import Debug from "debug";
 import axios from "axios";
 import { DateTime } from "luxon";
 import NodeCache from "node-cache";
+import TableContainer from "./models/TableContainer.js";
 
 const debug = Debug("nbpcalculator:api");
 
@@ -37,31 +38,45 @@ function getValidRange(year, month) {
 
 export const getRates = async (year, month) => {
   const now = DateTime.now();
+  const inCurrentMonth =
+    DateTime.local(year, month) >= DateTime.local(now.year, now.month);
+
+  const key = `${year}/${month}`;
+
+  if (inCurrentMonth) {
+    //For tables in current month use cache
+    if (apiCache.has(key)) {
+      debug("response from cache");
+      return apiCache.get(key);
+    }
+  } else {
+    const query = await TableContainer.findOne({ key });
+
+    if (query) {
+      return query.tables;
+    }
+  }
 
   const range = getValidRange(year, month);
 
-  const cacheKey = `${year}/${month}`;
-  const cacheTTL = year === now.year && month === now.month ? 3600 : 0;
+  try {
+    const response = await instance.get(
+      `/exchangerates/tables/A/${range.start}/${range.end}/`
+    );
 
-  debug(`ttl: ${cacheTTL} | key: ${cacheKey}`);
+    if (inCurrentMonth) {
+      apiCache.set(key, response.data);
+    } else {
+      const tableContainer = new TableContainer({
+        key,
+        tables: response.data,
+      });
 
-  if (apiCache.has(cacheKey)) {
-    debug("getting response from cache");
-    return apiCache.get(cacheKey);
-  } else {
-    let response;
-
-    try {
-      response = await instance.get(
-        `/exchangerates/tables/A/${range.start}/${range.end}/`
-      );
-    } catch (error) {
-      debug(error.message);
-      throw new Error(error.message);
+      await tableContainer.save();
     }
 
-    apiCache.set(cacheKey, response.data, cacheTTL);
-
     return response.data;
+  } catch (error) {
+    throw new Error(error.message);
   }
 };

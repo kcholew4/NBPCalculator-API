@@ -1,6 +1,9 @@
 import { DateTime } from "luxon";
 import _ from "lodash";
 import Joi from "joi";
+import Debug from "debug";
+
+const debug = Debug("nbpcalculator:handler");
 
 import * as nbpApi from "./nbpApi.js";
 
@@ -32,6 +35,7 @@ export default (io, socket) => {
         },
       });
     } catch (error) {
+      debug(error.message);
       callback({ ok: false });
     }
   });
@@ -53,6 +57,7 @@ export default (io, socket) => {
 
       callback({ ok: true, response: returnDisabledDays(payload, response) });
     } catch (error) {
+      debug(error.message);
       callback({ ok: false });
     }
   });
@@ -95,6 +100,7 @@ export default (io, socket) => {
         },
       });
     } catch (error) {
+      debug(error.message);
       callback({ ok: false });
     }
   });
