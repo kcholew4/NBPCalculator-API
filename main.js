@@ -7,14 +7,8 @@ import registerTableHandlers from "./tableHandler.js";
 
 const debug = Debug("nbpcalculator:main");
 
-const dbUserName = process.env.MONGODB_USERNAME;
-const dbPassword = process.env.MONGODB_PASSWORD;
-const dbName = process.env.MONGODB_DB_NAME;
-
-const connectionString = `mongodb+srv://${dbUserName}:${dbPassword}@cluster0.glpjc.mongodb.net/${dbName}`;
-
 try {
-  await mongoose.connect(connectionString);
+  await mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
   console.log("Connected to the database");
 } catch (error) {
   debug("couldn't connect to the database");
