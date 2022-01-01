@@ -22,28 +22,25 @@ function returnDisabledDays({ year, month }, tables) {
 
 export default (io, socket) => {
   socket.on("table:range", async (payload, callback) => {
-    const { year, month } = DateTime.now();
-
     try {
-      const response = await nbpApi.getRates(year, month);
+      const response = await nbpApi.getLastTable();
 
       callback({
         ok: true,
         response: {
           min: "2002-01-02",
-          max: response[response.length - 1].effectiveDate,
+          max: response.effectiveDate,
         },
       });
     } catch (error) {
-      debug(error.message);
       callback({ ok: false });
     }
   });
 
   socket.on("table:disabled-days", async (payload, callback) => {
     const schema = Joi.object({
-      year: Joi.number().integer(),
-      month: Joi.number().integer(),
+      year: Joi.number().integer().required(),
+      month: Joi.number().integer().required(),
     });
 
     const { error } = schema.validate(payload);
@@ -53,18 +50,17 @@ export default (io, socket) => {
     }
 
     try {
-      const response = await nbpApi.getRates(payload.year, payload.month);
+      const response = await nbpApi.getTables(payload.year, payload.month);
 
       callback({ ok: true, response: returnDisabledDays(payload, response) });
     } catch (error) {
-      debug(error.message);
       callback({ ok: false });
     }
   });
 
   socket.on("table:get", async (payload, callback) => {
     const schema = Joi.object({
-      date: Joi.string().isoDate(),
+      date: Joi.string().isoDate().required(),
     });
 
     const { error } = schema.validate(payload);
@@ -76,7 +72,7 @@ export default (io, socket) => {
     const date = DateTime.fromISO(payload.date);
 
     try {
-      const response = await nbpApi.getRates(date.year, date.month);
+      const response = await nbpApi.getTables(date.year, date.month);
 
       const table = response.find((el) => el.effectiveDate === payload.date);
 
@@ -100,7 +96,6 @@ export default (io, socket) => {
         },
       });
     } catch (error) {
-      debug(error.message);
       callback({ ok: false });
     }
   });

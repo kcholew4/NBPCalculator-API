@@ -36,7 +36,7 @@ function getValidRange(year, month) {
   };
 }
 
-export const getRates = async (year, month) => {
+export const getTables = async (year, month) => {
   const now = DateTime.now();
   const inCurrentMonth = DateTime.local(year, month) >= DateTime.local(now.year, now.month);
 
@@ -47,7 +47,7 @@ export const getRates = async (year, month) => {
     return apiCache.get(key);
   }
 
-  //Don't store in database tables from current month
+  //For tables in current month use cache
   if (!inCurrentMonth) {
     const query = await TableContainer.findOne({ key }, { "tables._id": 0 });
 
@@ -79,6 +79,28 @@ export const getRates = async (year, month) => {
 
     return response.data;
   } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return [];
+    }
+
+    debug(error.message);
+    throw new Error(error.message);
+  }
+};
+
+export const getLastTable = async () => {
+  if (apiCache.has("last")) {
+    return apiCache.get("last");
+  }
+
+  try {
+    const response = await instance.get("/exchangerates/tables/A/");
+
+    apiCache.set("last", response.data[0], 1800);
+
+    return response.data[0];
+  } catch (error) {
+    debug(error.message);
     throw new Error(error.message);
   }
 };
