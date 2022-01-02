@@ -16,7 +16,7 @@ try {
 }
 
 const server = http.createServer();
-const io = new Server(server);
+const io = new Server(server, { cors: {} });
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => console.log(`Listening on port ${port}`));
