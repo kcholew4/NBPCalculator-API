@@ -12,7 +12,14 @@ function returnDisabledDays({ year, month }, tables) {
   let allDays = [];
 
   for (let i = 0; i < start.daysInMonth; i++) {
-    allDays.push(start.plus({ days: i }).toISODate());
+    const date = start.plus({ days: i });
+
+    //If it's saturday or sunday, don't include
+    if (date.weekday === 7 || date.weekday === 6) {
+      continue;
+    }
+
+    allDays.push(date.toISODate());
   }
 
   const availableDays = tables.map((table) => table.effectiveDate);
