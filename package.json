@@ -1,6 +1,9 @@
 {
   "name": "nbpcalculator-api",
   "version": "1.0.0",
+  "engines": {
+    "node": "17.0.1"
+  },
   "exports": "./main.js",
   "license": "MIT",
   "dependencies": {
