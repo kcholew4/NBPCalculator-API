@@ -1,16 +1,15 @@
 import Debug from "debug";
-import http from "http";
 import { Server } from "socket.io";
 
-import registerTableHandlers from "./tableHandler.js";
+import registerTableHandlers from "./handlers/table.js";
 
 const debug = Debug("nbpcalculator:main");
 
-const server = http.createServer();
-const io = new Server(server, { cors: {} });
-
 const port = process.env.PORT || 3000;
-server.listen(port, () => console.log(`Listening on port ${port}`));
+
+console.log(`port set to: ${port}`);
+
+const io = new Server(port, { cors: {} });
 
 io.on("connection", (socket) => {
   debug(`ip: ${socket.handshake.address} connected`);
